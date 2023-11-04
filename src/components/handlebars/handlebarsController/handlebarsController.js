@@ -6,6 +6,7 @@ Controlador de handlebars */
 
 const HandlebarsServices = require('../handlebarsServices/handlebarsServices');
 const { usersServices } = require('../../../repositories/index');
+const { getTotalProducts } = require('../handlebarsServices/handlebarsServices');
 
 class HandlebarsController {
   getLogin = async (req, res) => {
@@ -23,11 +24,6 @@ class HandlebarsController {
     return res.render('recovery', data);
   };
 
-  /*   getUser = async (req, res) => {
-    const data = await HandlebarsServices.getUser(res);
-    const context = { user: req.session.user || req.user, ...data };
-    return res.render('profile', context);
-  }; */
   getUser = async (req, res) => {
     const data = await HandlebarsServices.getUser(res);
     const userData = req.session.user || req.user;
@@ -58,7 +54,7 @@ class HandlebarsController {
     }
 
     const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(user);
-    console.log('userWithCurrentDTO getCurrent running', userWithCurrentDTO);
+    /*     console.log('userWithCurrentDTO getCurrent running', userWithCurrentDTO); */
     // Utiliza userWithCurrentDTO en el contexto
     const context = { user: userWithCurrentDTO, ...data };
     return res.render('current', context);
@@ -72,7 +68,7 @@ class HandlebarsController {
     // Filtra y estructura los datos del usuario utilizando getUserWithCurrentDTO
     const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
 
-    console.log('userWithCurrentDTO getProducts running', userWithCurrentDTO);
+    /*     console.log('userWithCurrentDTO getProducts running', userWithCurrentDTO); */
     // Utiliza userWithCurrentDTO en el contexto
     const context = { user: userWithCurrentDTO, ...data };
 
@@ -86,7 +82,7 @@ class HandlebarsController {
 
     // Filtra y estructura los datos del usuario utilizando getUserWithCurrentDTO
     const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
-    console.log('userWithCurrentDTO getCartProductById running', userWithCurrentDTO);
+    /*     console.log('userWithCurrentDTO getCartProductById running', userWithCurrentDTO); */
 
     // Utiliza userWithCurrentDTO en la función HandlebarsServices.getCartProductById
     const data = await HandlebarsServices.getCartProductById(cartId, res, userWithCurrentDTO);
@@ -100,7 +96,7 @@ class HandlebarsController {
 
     // Filtra y estructura los datos del usuario utilizando getUserWithCurrentDTO
     const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
-    console.log('userWithCurrentDTO getRealTimeProducts running', userWithCurrentDTO);
+    /*     console.log('userWithCurrentDTO getRealTimeProducts running', userWithCurrentDTO); */
     // Utiliza userWithCurrentDTO en la función HandlebarsServices.getRealTimeProducts
     const data = await HandlebarsServices.getRealTimeProducts(limit, page, sort, query, res, userWithCurrentDTO);
 
@@ -110,15 +106,19 @@ class HandlebarsController {
   async getAdminProducts(req, res) {
     const { limit, page, sort, query } = req.query;
     const userData = req.session.user || req.user;
+
+    // Obtén el total de productos llamando a getTotalProducts
+    const totalProducts = await getTotalProducts();
+
     const data = await HandlebarsServices.getAdminProducts(limit, page, sort, query, res, userData);
 
     // Filtra y estructura los datos del usuario utilizando getUserWithCurrentDTO
     const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
 
-    console.log('userWithCurrentDTO getProducts running', userWithCurrentDTO);
-    // Utiliza userWithCurrentDTO en el contexto
-    const context = { user: userWithCurrentDTO, ...data };
-
+    // Agrega el total de productos al contexto
+    const context = { user: userWithCurrentDTO, ...data, totalProducts };
+    // Emitir el evento totalProductsUpdate a través de req.app.io
+    req.app.io.emit('totalProductsUpdate', totalProducts);
     return res.render('adminProducts', context);
   }
 
@@ -128,8 +128,7 @@ class HandlebarsController {
 
     // Filtra y estructura los datos del usuario utilizando getUserWithCurrentDTO
     const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
-    console.log('userWithCurrentDTO getHomeProducts running', userWithCurrentDTO);
-    // Utiliza userWithCurrentDTO en la función HandlebarsServices.getRealTimeProducts
+    /*     console.log('userWithCurrentDTO getHomeProducts running', userWithCurrentDTO); */
     // Utiliza userWithCurrentDTO en la función HandlebarsServices.getHomeProducts
     const data = await HandlebarsServices.getHomeProducts(limit, page, sort, query, res, userWithCurrentDTO);
 

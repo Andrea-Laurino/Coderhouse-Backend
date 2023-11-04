@@ -9,6 +9,13 @@ const { createHash } = require('../../../utils/bcrypt/bcrypt');
 /* Repository */
 const { usersServices } = require('../../../repositories/index');
 const { cartsServices } = require('../../../repositories/index');
+/* ************************************************************************** */
+/* test customError */
+/* ************************************************************************** */
+const CustomError = require('../../../utils/errors/services/customError');
+const EErrors = require('../../../utils/errors/services/enums');
+const { generateUserErrorInfo } = require('../../../utils/errors/services/info');
+/* ************************************************************************** */
 
 class UsersServices {
   /* ////////////////////////////////////////// */
@@ -28,11 +35,28 @@ class UsersServices {
 
   addUser = async (payload, res) => {
     try {
-      const { first_name, last_name, email, age, password } = payload;
-
-      if (!first_name || !last_name || !email || !age || !password) {
+      const { first_name, last_name, age, email, password } = payload;
+      /*     if (!first_name || !last_name || !email || !age || !password) {
         return res.sendServerError('Faltan campos obligatorios');
+      } */
+      /* ************************************************************************** */
+      /* test customError */
+      /* ************************************************************************** */
+      if (!first_name || !last_name || !email) {
+        console.log('entra al bloque');
+        try {
+          CustomError.createError({
+            name: 'User creation error',
+            cause: generateUserErrorInfo({ first_name, last_name, age, email, password }),
+            message: 'Error Trying to create User',
+            code: EErrors.INVALID_TYPES_ERROR,
+          });
+        } catch (error) {
+          console.error('Ocurrió un error en CustomError:', error);
+        }
+        return res.sendServerError('Faltan campos obligatorios del Usuario');
       }
+
       /* Repository */
       const existingUser = await usersServices.findOne({ email: email });
 
