@@ -1,0 +1,28 @@
+{
+	"info": {
+		"_postman_id": "d8101f77-5778-4cb4-98b7-a7110aad02dc",
+		"name": "logger",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "28943572"
+	},
+	"item": [
+		{
+			"name": "getLogger (developmentLogger)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/loggertest"
+			},
+			"response": []
+		},
+		{
+			"name": "getLogger (productionLogger)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/loggertest"
+			},
+			"response": []
+		}
+	]
+}

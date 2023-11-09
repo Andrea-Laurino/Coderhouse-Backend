@@ -1,0 +1,19 @@
+{
+	"info": {
+		"_postman_id": "94e1a0ea-cafd-4cd6-9ce7-7852e38ff84d",
+		"name": "mocking",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "28943572"
+	},
+	"item": [
+		{
+			"name": "addMocking",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": "http://localhost:8080/mockingproducts"
+			},
+			"response": []
+		}
+	]
+}

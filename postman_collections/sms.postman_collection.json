@@ -1,0 +1,50 @@
+{
+	"info": {
+		"_postman_id": "a4c64b2e-57e8-44ca-a436-f83f98181e0e",
+		"name": "sms",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "28943572"
+	},
+	"item": [
+		{
+			"name": "sendSMS",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"to\": \"+54 11 3216 0715\",\r\n    \"body\": \"Hola mundo\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/sms"
+			},
+			"response": [
+				{
+					"name": "sendSMS",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"to\": \"+54 11 5324 8798\",\r\n    \"body\": \"Hola mundo\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/mailer/sms"
+					},
+					"_postman_previewlanguage": "Text",
+					"header": [],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		}
+	]
+}

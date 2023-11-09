@@ -427,20 +427,20 @@ class CartsServices {
         <!-- Ejemplo: Mostrar productos comprados -->
         <h2>Productos Comprados</h2>
         <ul>
-          ${productsToPurchase
-						.map(
-							(productData) =>
-								`<li>${productData.productId}: ${productData.quantity}</li>`
-						)
-						.join('')}
+            ${productsToPurchase
+							.map(
+								(productData) =>
+									`<li>${productData.productId}: ${productData.quantity}</li>`
+							)
+							.join('')}
         </ul>
-      `;
+        `;
 
 			// Enviar el correo electrónico
 			const emailPayload = {
 				from: 'andreajlaurino@gmail.com', // Cambia esto a la dirección de tu correo
 				to: username, // El destinatario es el usuario obtenido del token o la sesión
-				subject: 'THE BEAUTY - Resultado de la compras',
+				subject: 'THE BEAUTY - Resultado de la compra',
 				html: emailContent,
 			};
 

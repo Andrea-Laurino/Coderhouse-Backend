@@ -15,6 +15,7 @@ const ticketsApi = require('../components/tickets');
 const mailerApi = require('../components/mail');
 const smsApi = require('../components/sms');
 const mockingApi = require('../components/mocking');
+const loggerApi = require('../components/logger');
 
 module.exports = (app) => {
   app.use(authApi.router);
@@ -29,4 +30,5 @@ module.exports = (app) => {
   app.use(mailerApi.router);
   app.use(smsApi.router);
   app.use(mockingApi.router);
+  app.use(loggerApi.router);
 };
