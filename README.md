@@ -2,7 +2,7 @@
 
 ## Video Demo
 
-[logger.webm](logger.webm)
+[logger](https://github.com/Andrea-Laurino/Coderhouse-Backend/assets/110556252/e7d89c1c-b85e-424b-9fa7-86dd3a5f9b80)
 
 ## Start
 
