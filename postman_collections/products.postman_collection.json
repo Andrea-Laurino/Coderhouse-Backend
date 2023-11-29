@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f872bbbd-8011-4160-b221-a09a92f5db06",
+		"_postman_id": "a9b4b633-81aa-4374-a200-052167d0bb92",
 		"name": "products",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "28943572"
@@ -130,7 +130,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/products?page=",
+					"raw": "http://localhost:8080/api/products?page=2",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -143,7 +143,7 @@
 					"query": [
 						{
 							"key": "page",
-							"value": ""
+							"value": "2"
 						}
 					]
 				}
@@ -386,7 +386,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"title\": \"Producto Postman\",\n  \"description\": \"Este es un producto de Postman\",\n  \"code\": \"a5\",\n  \"price\": 500,\n  \"stock\": 50,\n  \"category\": \"Categoría Postman\",\n  \"thumbnails\": []\n} ",
+					"raw": "{\n  \"title\": \"Producto premium 2\",\n  \"description\": \"Este es un producto de premium\",\n  \"code\": \"a5weee\",\n  \"price\": 500,\n  \"stock\": 50,\n  \"category\": \"Categoría premium\",\n  \"thumbnails\": [],\n \"owner\": {}\n} ",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -492,7 +492,7 @@
 					"variable": [
 						{
 							"key": "pid",
-							"value": "pid6f98"
+							"value": "65611728729c1bbead2ae515"
 						}
 					]
 				}

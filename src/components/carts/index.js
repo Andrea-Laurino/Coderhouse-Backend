@@ -27,7 +27,7 @@ class Carts extends CustomRouter {
     /* ************************************************************************************ */
     /* Public */
     /* ************************************************************************************ */
-    this.get(`${basePath}/`, ['ADMIN'], cartsController.getCarts);
+    this.get(`${basePath}/`, ['ADMIN', 'PREMIUM'], cartsController.getCarts);
     this.post(`${basePath}/`, ['ADMIN'], cartsController.addCart);
     this.get(`${basePath}/:cid`, ['ADMIN'], cartsController.getCartProductById);
 
@@ -35,12 +35,12 @@ class Carts extends CustomRouter {
     /* User */
     /* ************************************************************************************ */
     /* Sólo el USER puede agregar productos a su carrito carrito. */
-    this.post(`${basePath}/:cid/product/:pid`, ['USER'], cartsController.addProductToCart);
-    this.put(`${basePath}/:cid/product/:pid`, ['USER'], cartsController.updateProductQuantity);
+    this.post(`${basePath}/:cid/product/:pid`, ['USER', 'PREMIUM'], cartsController.addProductToCart);
+    this.put(`${basePath}/:cid/product/:pid`, ['USER', 'PREMIUM'], cartsController.updateProductQuantity);
     /* ************************************************************************************ */
     /* Nueva ruta purchase */
-    this.post(`${basePath}/:cid/purchase`, ['USER'], cartsController.purchaseCart);
-    this.post(`${basePath}/:cid/purchasecart`, ['USER'], cartsController.purchaseCartMail);
+    this.post(`${basePath}/:cid/purchase`, ['USER', 'PREMIUM'], cartsController.purchaseCart);
+    this.post(`${basePath}/:cid/purchasecart`, ['USER', 'PREMIUM'], cartsController.purchaseCartMail);
 
     /* ************************************************************************************ */
     /* Admin */

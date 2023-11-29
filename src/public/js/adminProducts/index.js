@@ -15,6 +15,7 @@ const addOrUpdateProductRow = (product) => {
       <td>${product.stock}</td>
       <td>${product.category}</td>
       <td>${product.thumbnails}</td>
+      <td>${product.owner}</td>
       <td>
         <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product._id}')">Eliminar</button>
       </td>

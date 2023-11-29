@@ -34,6 +34,22 @@ class UsersController {
     const { uid } = req.params;
     return await UsersServices.deleteUser(uid, res, req);
   };
+
+  resetPass = async (req, res) => {
+    const { email, password } = req.body;
+    return await UsersServices.resetPass({ email, password, res, req });
+  };
+
+  resetPassByEmail = async (req, res) => {
+    const { email } = req.query;
+    await UsersServices.resetPassByEmail(email, res, req);
+  };
+
+  updateUserPremium = async (req, res) => {
+    const { uid } = req.params;
+    const updateFields = req.body;
+    return await UsersServices.updateUserPremium(uid, updateFields, res, req);
+  };
 }
 
 module.exports = new UsersController();

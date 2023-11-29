@@ -1,8 +1,4 @@
-# Implementación de logger
-
-## Video Demo
-
-[logger](https://github.com/Andrea-Laurino/Coderhouse-Backend/assets/110556252/e7d89c1c-b85e-424b-9fa7-86dd3a5f9b80)
+# Documentar API
 
 ## Start
 
@@ -46,18 +42,10 @@
    http://localhost:<PORT>
    ```
 
-## Comandos para testing de las diferentes variables de entorno
+## Acceder a la documentación de la API
 
-### Desarrollo
-
-```bash
-node index.js -m development -p MONGO
 ```
-
-### Producción
-
-```bash
-node index.js -m production -p MONGO
+http://localhost:<PORT>/api-docs/
 ```
 
 ## Credenciales Admin

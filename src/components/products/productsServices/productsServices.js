@@ -59,8 +59,12 @@ class ProductsServices {
   addProduct = async (payload, images, res, req) => {
     try {
       const { title, description, code, price, stock, category } = payload;
+
+      // Obtener información del usuario que crea el producto desde req.session.user o req.user
+      const userData = req.session.user || req.user;
+      req.logger.debug('UserData', userData);
+
       if (!title || !description || !code || !price || !stock || !category) {
-        console.log('entra al bloque');
         try {
           CustomError.createError({
             name: 'Product creation error',
@@ -73,11 +77,12 @@ class ProductsServices {
         }
         return res.sendServerError('Faltan campos obligatorios del Producto');
       } else {
-        /* Repository */
         const existingProduct = await productsServices.findOne({ code: code });
         if (existingProduct) {
           return res.sendUserError('Ya existe un producto con el mismo código');
         } else {
+          const owner = userData.role === 'premium' ? userData._id : 'admin';
+
           const newProduct = new Product({
             title,
             description,
@@ -86,12 +91,15 @@ class ProductsServices {
             stock,
             category,
             thumbnails: images && images.length > 0 ? images.map((image) => image.filename) : [],
+            owner: owner,
           });
-          /* Repository */
-          await productsServices.save(newProduct);
-          req.app.io.emit('newProduct', newProduct);
 
-          /* Repository */
+          // Guardar el nuevo producto en la base de datos
+          await productsServices.save(newProduct);
+
+          await productsServices.populateOwner(newProduct);
+
+          req.app.io.emit('newProduct', newProduct);
           const totalProducts = await productsServices.countDocuments({});
           req.app.io.emit('totalProductsUpdate', totalProducts);
 
@@ -129,16 +137,24 @@ class ProductsServices {
         return res.sendUserError(`Los siguientes campos no se pueden modificar: ${invalidFields.join(', ')}`);
       } else {
         /* Repository */
+        const product = await productsServices.findById(pid);
+
+        if (!product) {
+          return res.sendNotFound('Producto no encontrado');
+        }
+
+        // Obtener información del usuario que intenta actualizar el producto
+        const userData = req.session.user || req.user;
+
+        if (userData.role === 'premium' && product.owner !== userData._id) {
+          return res.sendUserError('Este producto no fue creado por ti como user Premium. No tienes permisos para actualizar este producto');
+        }
+
         const updatedProduct = await productsServices.findByIdAndUpdate(pid, updateFields, { new: true });
 
-        if (!updatedProduct) {
-          return res.sendNotFound('Producto no encontrado');
-        } else {
-          req.app.io.emit('updateProduct', updatedProduct);
-          const data = updatedProduct;
-          /*           console.log('Producto actualizado correctamente'); */
-          return res.sendSuccess({ message: 'Producto actualizado correctamente', payload: data });
-        }
+        req.app.io.emit('updateProduct', updatedProduct);
+        const data = updatedProduct;
+        return res.sendSuccess({ message: 'Producto actualizado correctamente', payload: data });
       }
     } catch (error) {
       return res.sendServerError('Error al actualizar el producto');
@@ -148,19 +164,33 @@ class ProductsServices {
   deleteProduct = async (pid, res, req) => {
     try {
       /* Repository */
+      const product = await productsServices.findById(pid);
+
+      if (!product) {
+        return res.sendNotFound('Producto no encontrado');
+      }
+
+      // Obtener información del usuario que intenta eliminar el producto
+      const userData = req.session.user || req.user;
+
+      if (userData.role === 'premium' && product.owner !== userData._id) {
+        return res.sendUserError('Este producto no fue creado por ti como user Premium. No tienes permisos para eliminar este producto');
+      }
+
+      /* Repository */
       const deletedProduct = await productsServices.findByIdAndDelete(pid);
 
       if (!deletedProduct) {
         return res.sendNotFound('Producto no encontrado');
-      } else {
-        req.app.io.emit('deleteProduct', pid);
-        const data = deletedProduct;
-        /* Repository */
-        const totalProducts = await productsServices.countDocuments({});
-        req.app.io.emit('totalProductsUpdate', totalProducts);
-
-        return res.sendSuccess({ message: 'Producto eliminado correctamente', payload: data });
       }
+
+      req.app.io.emit('deleteProduct', pid);
+      const data = deletedProduct;
+      /* Repository */
+      const totalProducts = await productsServices.countDocuments({});
+      req.app.io.emit('totalProductsUpdate', totalProducts);
+
+      return res.sendSuccess({ message: 'Producto eliminado correctamente', payload: data });
     } catch (error) {
       return res.sendServerError('Error al eliminar el producto');
     }
@@ -194,6 +224,7 @@ class ProductsServices {
           price: product.price,
           stock: product.stock,
           category: product.category,
+          owner: product.owner,
         };
       });
 
@@ -251,6 +282,7 @@ class ProductsServices {
           stock: product.stock,
           category: product.category,
           thumbnails: product.thumbnails,
+          owner: product.owner,
         };
       });
 

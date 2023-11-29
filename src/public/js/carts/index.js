@@ -1,7 +1,6 @@
 /* ************************************************************************** */
 /* /src/public/js/carts/index.js - .js de /src/views/carts.handlebars */
 /* ************************************************************************** */
-// Agrega este código dentro de tu archivo carts.handlebars
 
 // Función para mostrar el SweetAlert
 function mostrarSweetAlert() {

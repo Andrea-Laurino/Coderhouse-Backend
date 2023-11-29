@@ -16,11 +16,11 @@ const MongoStore = require('connect-mongo');
 const PORT = `${config.port}` || 3001;
 const passport = require('passport');
 const initializePassport = require('./config/passport');
-/* Inicializar factory */
-const Dao = require('./dao/factory');
 /* faker products */
 const { generateFakeProducts } = require('./scripts/generateFakerProducts');
 const ErrorHandler = require('./utils/errors/index');
+/* swagger */
+const { swaggerUi, specs } = require('./utils/swagger/swagger');
 /* Importar loggerMiddleware porque /src/index.js no se ejecutó aún */
 const loggerMiddleware = require('./utils/logger/loggerMiddleware');
 /* Aplicamos el middleware para configurar req.logger */
@@ -55,6 +55,12 @@ class Server {
   views() {
     const handlebars = expressHandlebars.create({
       defaultLayout: 'main',
+      // Registra el helper "eq"
+      helpers: {
+        eq: function (a, b, options) {
+          return a === b ? 'selected' : '';
+        },
+      },
     });
     this.app.set('views', path.join(__dirname, 'views'));
     this.app.engine('handlebars', handlebars.engine);
@@ -77,6 +83,10 @@ class Server {
       })
     );
     initializePassport();
+
+    // Middleware de Swagger
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
     this.app.use(passport.initialize());
     this.app.use(passport.session());
     this.app.use(ErrorHandler);

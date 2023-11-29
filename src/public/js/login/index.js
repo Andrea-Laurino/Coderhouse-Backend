@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.status === 200) {
         if (data.user.role === 'admin') {
           window.location.href = '/admin';
-        } else if (data.user.role === 'user') {
+        } else if (data.user.role === 'user' || data.user.role === 'premium') {
           window.location.href = '/products';
         }
       } else {

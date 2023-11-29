@@ -7,6 +7,8 @@ Controlador de handlebars */
 const HandlebarsServices = require('../handlebarsServices/handlebarsServices');
 const { usersServices } = require('../../../repositories/index');
 const { getTotalProducts } = require('../handlebarsServices/handlebarsServices');
+const jwt = require('jsonwebtoken');
+const { config } = require('../../../config');
 
 class HandlebarsController {
   getLogin = async (req, res) => {
@@ -60,7 +62,7 @@ class HandlebarsController {
     return res.render('current', context);
   };
 
-  async getProducts(req, res) {
+  getProducts = async (req, res) => {
     const { limit, page, sort, query } = req.query;
     const userData = req.session.user || req.user;
     const data = await HandlebarsServices.getProducts(limit, page, sort, query, res, userData);
@@ -73,24 +75,21 @@ class HandlebarsController {
     const context = { user: userWithCurrentDTO, ...data };
 
     return res.render('products', context);
-  }
+  };
 
-  async getCartProductById(req, res) {
+  getCartProductById = async (req, res) => {
     const { cid } = req.params;
     const cartId = cid;
     const userData = req.session.user || req.user;
 
     // Filtra y estructura los datos del usuario utilizando getUserWithCurrentDTO
-    const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
     /*     console.log('userWithCurrentDTO getCartProductById running', userWithCurrentDTO); */
-
-    // Utiliza userWithCurrentDTO en la función HandlebarsServices.getCartProductById
-    const data = await HandlebarsServices.getCartProductById(cartId, res, userWithCurrentDTO);
+    const data = await HandlebarsServices.getCartProductById(cartId, res, userData);
 
     return res.render('carts', data);
-  }
+  };
 
-  async getRealTimeProducts(req, res) {
+  getRealTimeProducts = async (req, res) => {
     const { limit, page, sort, query } = req.query;
     const userData = req.session.user || req.user;
 
@@ -101,9 +100,9 @@ class HandlebarsController {
     const data = await HandlebarsServices.getRealTimeProducts(limit, page, sort, query, res, userWithCurrentDTO);
 
     return res.render('realTimeProducts', data);
-  }
+  };
 
-  async getAdminProducts(req, res) {
+  getAdminProducts = async (req, res) => {
     const { limit, page, sort, query } = req.query;
     const userData = req.session.user || req.user;
 
@@ -120,9 +119,9 @@ class HandlebarsController {
     // Emitir el evento totalProductsUpdate a través de req.app.io
     req.app.io.emit('totalProductsUpdate', totalProducts);
     return res.render('adminProducts', context);
-  }
+  };
 
-  async getHomeProducts(req, res) {
+  getHomeProducts = async (req, res) => {
     const { limit, page, sort, query } = req.query;
     const userData = req.session.user || req.user;
 
@@ -133,11 +132,38 @@ class HandlebarsController {
     const data = await HandlebarsServices.getHomeProducts(limit, page, sort, query, res, userWithCurrentDTO);
 
     return res.render('home', data);
-  }
+  };
 
   getChat = async (req, res) => {
     const data = await HandlebarsServices.getChat(res);
     return res.render('chat', data);
+  };
+
+  getResetPassByEmail = async (req, res) => {
+    const data = await HandlebarsServices.getResetPassByEmail(res);
+    return res.render('resetPassByEmail', data);
+  };
+
+  getResetPassExpiredToken = async (req, res) => {
+    const data = await HandlebarsServices.getResetPassExpiredToken(res);
+    return res.render('resetPassExpiredToken', data);
+  };
+
+  getResetPass = async (req, res) => {
+    const data = await HandlebarsServices.getResetPass(res);
+    const { token } = req.params;
+
+    // Verifica si el token es válido
+    jwt.verify(token, config.jwt_secret, (err, decodedToken) => {
+      if (err) {
+        // Token no válido o expirado, redirige a la vista Link expirado
+        return res.redirect('/resetPassExpiredToken');
+      }
+
+      // El token es válido, puedes mostrar la página de restablecimiento de contraseña
+      data.token = token; // Agrega el token al contexto
+      return res.render('resetPass', data);
+    });
   };
 }
 

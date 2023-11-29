@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "92b02cc0-7faf-4ae3-94ea-9216209ef997",
+		"_postman_id": "75915663-2541-4d02-8a49-eff1b8e72ba1",
 		"name": "carts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "28943572"
@@ -81,11 +81,11 @@
 					"variable": [
 						{
 							"key": "cid",
-							"value": "24d8db35bb926211d7e54a01"
+							"value": "6561162b729c1bbead2ae4fd"
 						},
 						{
 							"key": "pid ",
-							"value": "64b085999d87fedd08b85709"
+							"value": "64f11933df794545a078d6b6"
 						}
 					]
 				}
@@ -168,7 +168,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"products\": [\r\n    {\r\n      \"productId\": \"64ee89c9f2b4a86f736be9c8\",\r\n      \"quantity\": 12\r\n    },\r\n    {\r\n      \"productId\": \"64ee8990f2b4a86f736be9af\",\r\n      \"quantity\": 9\r\n    }\r\n  ]\r\n}\r\n",
+					"raw": "{\r\n  \"products\": [\r\n    {\r\n      \"productId\": \"64a6a23e2fa68202c17ab65f\",\r\n      \"quantity\": 2\r\n    },\r\n    {\r\n      \"productId\": \"64a6a25a2fa68202c17ab662\",\r\n      \"quantity\": 3\r\n    }\r\n  ]\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -228,11 +228,11 @@
 					"variable": [
 						{
 							"key": "cid",
-							"value": "654192efedb4282b92e7056b"
+							"value": "64aee062cae268c789dea5ae"
 						},
 						{
 							"key": "pid",
-							"value": "64ee89c9f2b4a86f736be9c8"
+							"value": "64a6a25a2fa68202c17ab662"
 						}
 					]
 				}
@@ -288,7 +288,7 @@
 					"variable": [
 						{
 							"key": "cid",
-							"value": "64f7c7169ced392e8e7083c0"
+							"value": "65004b9ae0e3c42c254adc74"
 						}
 					]
 				}

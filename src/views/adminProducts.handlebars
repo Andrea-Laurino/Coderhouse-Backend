@@ -11,33 +11,28 @@
 			<div class='container'>
 				<div class='d-flex align-items-center justify-content-between p-2'>
 					<div class='d-none d-md-block'>
-						<h4 class='m-0'>PONTOSHOP</h4>
+						<h4 class='m-0'>THE BEAUTY</h4>
 						<p class='form_p d-none d-md-block text-center m-0'>Tu belleza,
 							nuestra pasión.</p>
 					</div>
 					<div
 						class='d-flex flex-column justify-content-center align-items-center ms-md-4'
 					>
-						<h2 class='fw-bold text-center d-none d-md-block'>ADMIN | Productos</h2>
-						<h2 class='fw-bold text-center d-md-none'>ADMIN</h2>
+						<h2 class='fw-bold text-center d-none d-md-block'><span
+								class='text-uppercase'
+							>{{user.role}}</span>
+							| Productos</h2>
+						<h2 class='fw-bold text-center d-md-none'><span
+								class='text-uppercase'
+							>{{user.role}}</span></h2>
 						<h5 class='text-center m-0 ms-2 d-flex'><span
 								class='d-none d-md-block me-2'
 							>Total:</span><span class='text-primary' id='totalProductsValue'>
 								{{totalProducts}}
 							</span></h5>
 					</div>
-					<div
-						class='d-flex flex-column justify-content-center align-items-start'
-					>
-						<div class='text-secondary d-none d-md-block'>
-							<div class='text-secondary d-none d-md-block'>
-								<p class='font_id mb-2'><span
-										class='fw-bold text-danger text-uppercase'
-									>{{user.role}}: </span>
-									<span id='userEmail'>{{user.email}}</span></p>
-							</div>
-						</div>
-						<div class='d-flex align-items-center mb-2'>
+					<div class='d-flex justify-content-center align-items-center'>
+						<div class='d-flex align-items-center mb-2 me-3'>
 							<div>
 								<a
 									class='btn btn-warning'
@@ -50,6 +45,18 @@
 									class='btn btn-outline-danger'
 									href='/api/session/auth/logout'
 								>Logout</a>
+							</div>
+						</div>
+						<div class='text-secondary d-none d-md-block'>
+							<div class='text-secondary d-none d-md-block'>
+								<p class='font_id mb-0'><span class='fw-bold'>Role: </span>
+									<span class='fw-bold text-danger text-uppercase'>{{user.role}}
+									</span>
+								</p>
+								<p class='font_id mb-0'><span class='fw-bold'>Email: </span>
+									<span id='userEmail'>{{user.email}}</span></p>
+								<p class='font_id mb-2'><span class='fw-bold'>User ID: </span>
+									<span id='cartId'>{{user._id}}</span></p>
 							</div>
 						</div>
 					</div>
@@ -78,6 +85,7 @@
 								<th>Stock</th>
 								<th>Categoría</th>
 								<th>Imagen</th>
+								<th>Owner</th>
 								<th>Acción</th>
 							</tr>
 						</thead>
@@ -92,6 +100,7 @@
 									<td>{{stock}}</td>
 									<td>{{category}}</td>
 									<td>{{thumbnails}}</td>
+									<td>{{owner}}</td>
 									<td><button
 											class='btn btn-danger btn-sm'
 											onclick='deleteProduct("{{_id}}")'

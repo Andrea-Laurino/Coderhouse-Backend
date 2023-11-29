@@ -10,6 +10,7 @@ const { Ticket } = require('../../../models/tickets');
 const jwtUtils = require('../../../utils/jwt/jwt');
 const { v4: uuidv4 } = require('uuid');
 const MailManager = require('../../../utils/mailManager/mailManager');
+const path = require('path');
 
 class CartsServices {
 	constructor() {
@@ -88,18 +89,27 @@ class CartsServices {
 		}
 	};
 
-	addProductToCart = async (cid, pid, quantity, res) => {
+	addProductToCart = async (cid, pid, quantity, res, req) => {
 		try {
-			/* Repository */
 			const cart = await cartsServices.findById(cid);
 			if (!cart) {
 				return res.sendNotFound('Carrito no encontrado');
 			}
 
-			/* Repository */
 			const product = await productsServices.findById(pid);
 			if (!product) {
 				return res.sendNotFound('ID de Producto no encontrado');
+			}
+			const userData = req.session.user || req.user;
+
+			if (
+				userData &&
+				userData.role === 'premium' &&
+				product.owner === userData._id
+			) {
+				return res.sendServerError(
+					'No puedes agregar tu propio producto creado como owner premium al carrito creado '
+				);
 			}
 
 			const productIndex = cart.products.findIndex(
@@ -115,7 +125,6 @@ class CartsServices {
 				cart.products[productIndex].quantity += quantity || 1;
 			}
 
-			/* Repository */
 			await cartsServices.save(cart);
 			const data = cart;
 			return res.sendSuccess({
@@ -126,7 +135,6 @@ class CartsServices {
 			return res.sendServerError('Error al agregar el producto al carrito');
 		}
 	};
-
 	deleteCart = async (cid, res) => {
 		try {
 			/* Repository */
@@ -341,7 +349,7 @@ class CartsServices {
 		}
 	};
 
-	async purchaseCartMail(cid, req, res) {
+	purchaseCartMail = async (cid, req, res) => {
 		const ticketCode = uuidv4();
 		try {
 			const cart = await cartsServices.findById(cid);
@@ -404,7 +412,7 @@ class CartsServices {
 				purchaser: username, // Utiliza el nombre de usuario extraído del token o la sesión
 			});
 
-			/*       console.log('~~~Ticket~~~', ticket); */
+			// console.log('~~~Ticket~~~', ticket);
 			await ticketsServices.create(ticket);
 			// Actualizar el carrito con los productos no comprados
 			cart.products = productsToPurchase.filter((productData) =>
@@ -413,35 +421,45 @@ class CartsServices {
 
 			await cartsServices.save(cart);
 			// Construir el correo electrónico
+
 			const emailContent = `
-        <h1>Resultado de la compra</h1>
-        <p>Ticket Code: ${ticketCode}</p>
-        <p>Username: ${username}</p>
-        <p>Total Products: ${productsToPurchase.length}</p>
-        <p>Products Purchased: ${
+				<h1>Resultado de la compra</h1>
+				<p>Ticket Code: ${ticketCode}</p>
+				<p>Username: ${username}</p>
+				<p>Total Products: ${productsToPurchase.length}</p>
+				<p>Products Purchased: ${
 					productsToPurchase.length - productsNotPurchased.length
 				}</p>
-        <p>Products Not Purchased: ${productsNotPurchased.length}</p>
-        <!-- Agrega cualquier otra información que desees en el correo -->
+				<p>Products Not Purchased: ${productsNotPurchased.length}</p>
+				<!-- Agrega cualquier otra información que desees en el correo -->
 
-        <!-- Ejemplo: Mostrar productos comprados -->
-        <h2>Productos Comprados</h2>
-        <ul>
-            ${productsToPurchase
-							.map(
-								(productData) =>
-									`<li>${productData.productId}: ${productData.quantity}</li>`
-							)
-							.join('')}
-        </ul>
-        `;
-
+				<!-- Ejemplo: Mostrar productos comprados -->
+				<h2>Productos Comprados</h2>
+				<ul>
+				${productsToPurchase
+					.map(
+						(productData) =>
+							`<li>${productData.productId}: ${productData.quantity}</li>`
+					)
+					.join('')}
+				</ul>`;
+			// console.log(emailContent)
+			/* ////////////////////////////////////////////////////////////// */
+			/* attachments implementado en un correo electrónico */
+			/* ////////////////////////////////////////////////////////////// */
+			const attachments = [
+				{
+					filename: 'freelo.png',
+					path: path.join(__dirname, '../../../uploads/mail/freelo.png'),
+				},
+			];
 			// Enviar el correo electrónico
 			const emailPayload = {
 				from: 'andreajlaurino@gmail.com', // Cambia esto a la dirección de tu correo
 				to: username, // El destinatario es el usuario obtenido del token o la sesión
 				subject: 'THE BEAUTY - Resultado de la compra',
 				html: emailContent,
+				attachments,
 			};
 
 			await MailManager.sendEmail(emailPayload);
@@ -468,7 +486,7 @@ class CartsServices {
 				'Error al procesar la compra y enviar el correo electrónico'
 			);
 		}
-	}
+	};
 }
 
 module.exports = new CartsServices();

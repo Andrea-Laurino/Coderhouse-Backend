@@ -218,6 +218,11 @@ class HandlebarsServices {
         })),
       };
 
+      let totalCartProducts = 0;
+      if (formattedCart.products && formattedCart.products.length > 0) {
+        totalCartProducts = formattedCart.products.reduce((total, item) => total + item.quantity, 0);
+      }
+
       const context = {
         success: true,
         title: 'Carts',
@@ -225,6 +230,7 @@ class HandlebarsServices {
         cartId: cid,
         style: 'index.css',
         user: userData,
+        totalCartProducts: totalCartProducts, // Update the totalCartProducts value
       };
 
       return context;
@@ -238,6 +244,28 @@ class HandlebarsServices {
       return { success: true, title: 'Chat', style: 'index.css' };
     } catch (error) {
       return res.sendServerError('Error Handlebars getChat');
+    }
+  };
+
+  getResetPassByEmail = async (res) => {
+    try {
+      return { success: true, title: 'Reset', style: 'index.css' };
+    } catch (error) {
+      return res.sendServerError('Error Handlebars getReset');
+    }
+  };
+  getResetPassExpiredToken = async (res) => {
+    try {
+      return { success: true, title: 'Expired link', style: 'index.css' };
+    } catch (error) {
+      return res.sendServerError('Error Handlebars getReset');
+    }
+  };
+  getResetPass = async (res) => {
+    try {
+      return { success: true, title: 'Reset', style: 'index.css' };
+    } catch (error) {
+      return res.sendServerError('Error Handlebars getReset');
     }
   };
 }
