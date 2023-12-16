@@ -55,10 +55,13 @@ class Server {
   views() {
     const handlebars = expressHandlebars.create({
       defaultLayout: 'main',
-      // Registra el helper "eq"
       helpers: {
         eq: function (a, b, options) {
           return a === b ? 'selected' : '';
+        },
+        // Registra el helper "get"
+        get: function (object, property) {
+          return object[property];
         },
       },
     });

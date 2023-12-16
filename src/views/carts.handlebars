@@ -12,8 +12,8 @@
 				<div class='d-flex align-items-center justify-content-between p-2'>
 					<div>
 						<h4 class='m-0'>THE BEAUTY</h4>
-						<p class='form_p d-none d-md-block text-center m-0'>Tu belleza,
-							nuestra pasión.</p>
+						<p class='form_p d-none d-md-block text-center m-0'>Sabemos de
+							colores!</p>
 					</div>
 					{{!////////////////////// }}
 					<div class='d-flex justify-content-center align-items-center ms-md-4'>
@@ -48,7 +48,7 @@
 									class='btn btn-warning mb-2 mb-md-0'
 									href='/user'
 									role='button'
-								>Perfil</a>
+								>Profile</a>
 							</div>
 							<div class='ps-2'>
 								<a
@@ -90,12 +90,18 @@
 								<th>Categoría</th>
 								<th>Cantidad</th>
 								<th>Precio</th>
+								<th>Acción</th>
 							</tr>
 						</thead>
+						<p class='font_id mb-2'><span class='fw-bold'>User ID: </span>
+							<span
+								id='cartDivId'
+								data-cart-id='{{user.cart}}'
+							>{{user.cart}}</span></p>
 						<tbody>
 							{{#each carts}}
 								{{#each this.products}}
-									<tr>
+									<tr id='{{this.productId._id}}'>
 										<td>{{this.productId._id}}</td>
 										<td>{{this.productId.title}}</td>
 										<td>{{this.productId.description}}</td>
@@ -103,6 +109,14 @@
 										<td>{{this.productId.category}}</td>
 										<td>{{this.quantity}}</td>
 										<td>{{this.productId.price}}</td>
+										<td>
+											<button
+												class='btn btn-danger btn-sm'
+												onclick='deleteCartProduct("{{this.productId._id}}")'
+											>
+												Eliminar
+											</button>
+										</td>
 									</tr>
 								{{/each}}
 							{{/each}}

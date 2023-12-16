@@ -50,3 +50,12 @@ exports.validateTicketId = (req, res, next, tid) => {
   req.ticketId = tid;
   next();
 };
+
+exports.validateDocumentId = (req, res, next, did) => {
+  if (!validMongoId.test(did)) {
+    return res.status(400).json({ error: 'Invalid user ID format. Debe ser un id con el formato de MongoDB' });
+  }
+
+  req.documentId = did;
+  next();
+};

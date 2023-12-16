@@ -46,15 +46,31 @@ class HandlebarsServices {
 
   getUser = async (res) => {
     try {
-      return { success: true, title: 'Profile', style: 'index.css' };
+      return { success: true, title: 'User | Profile', style: 'index.css' };
     } catch (error) {
+      return res.sendServerError('Error Handlebars getUser');
+    }
+  };
+
+  getUserDashboard = async (userData) => {
+    try {
+      const context = {
+        success: true,
+        title: 'User | Dashboard',
+        style: 'index.css',
+        user: userData,
+      };
+
+      return context;
+    } catch (error) {
+      // Manejo de errores
       return res.sendServerError('Error Handlebars getUser');
     }
   };
 
   getAdmin = async (res) => {
     try {
-      return { success: true, title: 'Dashboard', style: 'index.css' };
+      return { success: true, title: 'Admin | Profile', style: 'index.css' };
     } catch (error) {
       return res.sendServerError('Error Handlebars getAdmin');
     }
@@ -140,15 +156,15 @@ class HandlebarsServices {
       return 0; // Puedes devolver un valor predeterminado en caso de error
     }
   };
-  getAdminProducts = async (limit, page, sort, query, res, userData) => {
+  getAdminDashboardProducts = async (limit, page, sort, query, res, userData) => {
     try {
-      const products = await ProductsServices.getAdminProducts(limit, page, sort, query, res);
+      const products = await ProductsServices.getAdminDashboardProducts(limit, page, sort, query, res);
 
       let totalCartProducts = 0;
 
       const context = {
         success: true,
-        title: 'Admin | Productos',
+        title: 'Admin | Dashboard | Products',
         products: products.products,
         style: 'index.css',
         hasPrevPage: products.hasPrevPage,

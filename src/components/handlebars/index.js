@@ -48,6 +48,7 @@ class HandlebarsRoutes extends CustomRouter {
     this.get('/carts/:cid', ['USER', 'PREMIUM'], handlebarsController.getCartProductById);
     /* Sólo el USER puede acceder al perfil de usuario. */
     this.get('/user', ['USER', 'PREMIUM'], handlebarsController.getUser);
+    this.get('/user/dashboard', ['USER', 'PREMIUM'], handlebarsController.getUserDashboard);
     /* Sólo el USER puede enviar mensajes al chat. */
     this.get('/chat', ['USER', 'PREMIUM'], handlebarsController.getChat);
 
@@ -56,7 +57,7 @@ class HandlebarsRoutes extends CustomRouter {
     /* ************************************************************************************ */
     this.get('/admin', ['ADMIN', 'PREMIUM'], handlebarsController.getAdmin);
     /* Sólo el ADMIN puede crear, actualizar y eliminar productos. */
-    this.get('/admin/products', ['ADMIN', 'PREMIUM'], handlebarsController.getAdminProducts);
+    this.get('/admin/dashboard/products', ['ADMIN', 'PREMIUM'], handlebarsController.getAdminDashboardProducts);
 
     /* //////////////////////////////////// */
     /* Views de otros desafíos */

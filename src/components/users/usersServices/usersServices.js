@@ -4,11 +4,14 @@
 /* ************************************************************************** */
 
 const { User } = require('../../../models/users');
-const { Cart } = require('../../../models/carts');
+const JWTService = require('../../../utils/jwt/jwt');
+const jwt = require('jsonwebtoken');
 const { createHash } = require('../../../utils/bcrypt/bcrypt');
+const { Cart } = require('../../../models/carts');
+const { config } = require('../../../config');
 /* Repository */
-const { usersServices } = require('../../../repositories/index');
 const { cartsServices } = require('../../../repositories/index');
+const { usersServices } = require('../../../repositories/index');
 /* ************************************************************************** */
 /* test customError */
 /* ************************************************************************** */
@@ -20,17 +23,17 @@ const {
 /* ************************************************************************** */
 const MailManager = require('../../../utils/mailManager/mailManager');
 const path = require('path');
-const { config } = require('../../../config');
 const PORT = `${config.port}`;
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+
+/* const req = require('../../../utils/logger/loggerSetup'); */
 
 class UsersServices {
 	/* ////////////////////////////////////////// */
 	/* Jwt */
 	/* ////////////////////////////////////////// */
 
-	getUsers = async (res) => {
+	getUsers = async (req, res) => {
 		try {
 			/* Repository */
 			const users = await usersServices.findAll();
@@ -41,17 +44,84 @@ class UsersServices {
 		}
 	};
 
+	registerUser = async (req, payload, res) => {
+		try {
+			const { first_name, last_name, email, age, password, role } = payload;
+
+			if (!first_name || !last_name || !email || !age || !password) {
+				return res.sendServerError('Faltan campos obligatorios');
+			}
+
+			/* Repository */
+			const existingUser = await usersServices.findOne({ email: email });
+
+			if (existingUser) {
+				return res.sendUserError(
+					'Ya existe un usuario con el mismo correo electrónico'
+				);
+			}
+
+			const newUser = new User({
+				first_name,
+				last_name,
+				email,
+				age,
+				password: createHash(password),
+				role,
+			});
+
+			/* Utilización de DTO de  /src/repositories/users.repository.js   */
+			const savedUser = await usersServices.createUserDTO(newUser);
+
+			const userCart = new Cart({
+				user: savedUser._id,
+				products: [],
+			});
+
+			/* Repository */
+			await cartsServices.save(userCart);
+
+			savedUser.cart = userCart._id;
+			await savedUser.save();
+
+			const data = newUser;
+			const token = await JWTService.generateJwt({ id: savedUser._id });
+			/* Repository */
+			await usersServices.findByIdAndUpdate(
+				savedUser._id,
+				{ token },
+				{ new: true }
+			);
+
+			/* Repository */
+			/*       let updatedUser = await usersServices.findByIdAndUpdate(savedUser._id, { token }, { new: true }); */
+			/*       console.log('~~~User registrado~~~', updatedUser); */
+
+			/*Logger */
+			/*       req.logger.debug(`User registrado: ${JSON.stringify(updatedUser, null, 2)}`); */
+
+			return res.sendCreated({
+				payload: {
+					message: 'Usuario agregado correctamente',
+					token,
+					data,
+				},
+			});
+		} catch (error) {
+			/*Logger */
+			req.logger.error('Error al agregar el usuario');
+			return res.sendServerError('Error al agregar el usuario');
+		}
+	};
+	/* Método addUser dejado como muestra de implementación de CustomError. Es reemplazado por registerUser  */
 	addUser = async (payload, res) => {
 		try {
 			const { first_name, last_name, age, email, password } = payload;
-			/*     if (!first_name || !last_name || !email || !age || !password) {
-        return res.sendServerError('Faltan campos obligatorios');
-      } */
 			/* ************************************************************************** */
 			/* test customError */
 			/* ************************************************************************** */
 			if (!first_name || !last_name || !email) {
-				console.log('entra al bloque');
+				/*         console.log('entra al bloque'); */
 				try {
 					CustomError.createError({
 						name: 'User creation error',
@@ -182,6 +252,16 @@ class UsersServices {
 				);
 			}
 
+			// Validar si el campo 'role' existe en los campos de actualización
+			if (updateFields.hasOwnProperty('role')) {
+				// Verificar si el valor de 'role' es uno de los valores permitidos
+				if (!['admin', 'user', 'premium'].includes(updateFields.role)) {
+					return res.sendUserError(
+						'El campo "role" solo puede cambiar a "admin", "user" o "premium"'
+					);
+				}
+			}
+
 			/* Repository */
 			const updatedUser = await usersServices.findByIdAndUpdate(
 				uid,
@@ -293,10 +373,10 @@ class UsersServices {
 
 			// Contenido del correo electrónico
 			const emailContent = `
-		<h1>Reestablezca su contraseña</h1>
-		<p>Username: ${username}</p>
-		<p>Acceda <a href="${resetPasswordLink}">aquí</a> para reestablecer su contraseña.</p>
-		<!-- Agrega cualquier otra información que desees en el correo -->
+      <h1>Reestablezca su contraseña</h1>
+      <p>Username: ${username}</p>
+      <p>Acceda <a href="${resetPasswordLink}">aquí</a> para reestablecer su contraseña.</p>
+      <!-- Agrega cualquier otra información que desees en el correo -->
     `;
 
 			// Configuración del correo electrónico
@@ -310,7 +390,7 @@ class UsersServices {
 			const emailPayload = {
 				from: 'andreajlaurino@gmail.com',
 				to: user.email,
-				subject: 'THE BEAUTY - Reestablecer contraseña',
+				subject: 'THE BEAUTY - Reestablecimiento de contraseña',
 				html: emailContent,
 				attachments,
 			};
@@ -345,6 +425,7 @@ class UsersServices {
 	updateUserPremium = async (uid, updateFields, res, req) => {
 		try {
 			const allowedFields = ['role'];
+
 			// Verificar si el campo 'role' existe en updateFields y si su valor es 'user' o 'premium'
 			if (
 				updateFields.hasOwnProperty('role') &&
@@ -353,6 +434,22 @@ class UsersServices {
 				return res.sendUserError(
 					'Eres un user premium. El campo role solo puedes cambiarlo a user o premium'
 				);
+			}
+
+			// Repository
+			const user = await usersServices.findById(uid);
+
+			if (!user) {
+				return res.sendNotFound('Usuario no encontrado');
+			}
+
+			if (updateFields.role === 'premium') {
+				// Verificar si los documentos requeridos han sido cargados
+				if (user.premium_documents_status !== 'upload') {
+					return res.sendUserError(
+						'El usuario no ha completado la documentación necesaria para ser premium'
+					);
+				}
 			}
 
 			const invalidFields = Object.keys(updateFields).filter(
@@ -390,6 +487,174 @@ class UsersServices {
 			return res.sendServerError('Error al actualizar el usuario');
 		}
 	};
+
+	/*   ************************************************************* */
+	uploadDocuments = async (uid, res, req) => {
+		try {
+			// Verificar si el usuario existe
+			const user = await usersServices.findById(uid);
+			if (!user) {
+				return res.sendNotFound('Usuario no encontrado');
+			}
+
+			// Verificar si se cargaron documentos
+			if (!req.files || req.files.length === 0) {
+				return res.sendUserError('No se cargaron documentos');
+			}
+			/*       console.log('Files', req.files); */
+
+			// Por ejemplo, si deseas guardar la información de los documentos en la base de datos
+			const documentInfo = req.files.map((file) => {
+				return {
+					name: file.filename,
+					reference: file.destination,
+					mimetype: file.mimetype,
+					fieldname: file.fieldname,
+					/* status: 'upload', */
+				};
+			});
+
+			// Obtén el nombre del último documento agregado
+			const newDocumentName = documentInfo[documentInfo.length - 1].name;
+
+			// Actualiza el estado del usuario para indicar que se han subido documentos
+			user.documents.push(...documentInfo); // Agrega los nuevos documentos al arreglo de documentos del usuario
+			// Comprobar si el usuario ya tiene al menos un documento de cada uno de los fieldnames requeridos
+			const hasIdentificacion = user.documents.some(
+				(doc) => doc.fieldname === 'identificacion'
+			);
+			const hasComprobanteDeDomicilio = user.documents.some(
+				(doc) => doc.fieldname === 'comprobanteDeDomicilio'
+			);
+			const hasComprobanteDeEstadoDeCuenta = user.documents.some(
+				(doc) => doc.fieldname === 'comprobanteDeEstadoDeCuenta'
+			);
+
+			if (
+				hasIdentificacion &&
+				hasComprobanteDeDomicilio &&
+				hasComprobanteDeEstadoDeCuenta
+			) {
+				user.premium_documents_status = 'upload'; // Actualiza el estado a 'upload'
+			} else {
+				user.premium_documents_status = 'pending'; // Deja el estado como 'pending'
+			}
+			user.documents_status = 'upload'; // Cambia el estado de documents_status a 'upload'
+			const savedUser = await user.save();
+
+			// Busca el documento recién creado en la base de datos por su nombre
+			const newlyCreatedDocument = savedUser.documents.find(
+				(doc) => doc.name === newDocumentName
+			);
+
+			if (newlyCreatedDocument) {
+				const documentIds = documentInfo.map((file) => {
+					const matchingDocument = savedUser.documents.find(
+						(doc) => doc.name === file.name
+					);
+					return matchingDocument._id;
+				});
+
+				/*         console.log('IDs de los nuevos documentos:', documentIds); */
+
+				// Actualiza el documentoInfo con IDs individuales
+				const updatedDocumentInfo = documentInfo.map((file, index) => {
+					return {
+						id: documentIds[index], // Agregar el ID del documento
+						name: file.name,
+						reference: file.reference,
+						mimetype: file.mimetype,
+						fieldname: file.fieldname,
+						/* status: 'upload', */
+					};
+				});
+
+				/*         console.log('uploadDocuments - documentInfo:', updatedDocumentInfo); */
+
+				// Incluye los datos del usuario en la respuesta
+				const data = {
+					user: savedUser,
+					documents: updatedDocumentInfo,
+				};
+
+				req.app.io.emit('newDocument', data);
+				req.app.io.emit('newStatus', data);
+				return res.sendSuccess({
+					message: 'Documentos subidos correctamente',
+					payload: data,
+				});
+			} else {
+				/*         console.log('Documento no encontrado en la base de datos'); */
+				return res.sendServerError('Error al subir documentos');
+			}
+		} catch (error) {
+			return res.sendServerError('Error al subir documentos');
+		}
+	};
+
+	/*   ************************************************************* */
+	deleteDocumentById = async (uid, did, res, req) => {
+		try {
+			// Find the user by UID
+			const user = await usersServices.findById(uid);
+			if (!user) {
+				return res.sendNotFound('Usuario no encontrado');
+			}
+
+			// Find the document index in the user's documents array
+			const documentIndex = user.documents.findIndex(
+				(doc) => doc._id.toString() === did
+			);
+
+			if (documentIndex === -1) {
+				return res.sendNotFound('Documento no encontrado');
+			}
+
+			// Remove the document from the user's documents array
+			const deletedDocument = user.documents.splice(documentIndex, 1)[0]; // Get the deleted document
+
+			// Check if there are no remaining documents
+			if (user.documents.length === 0) {
+				user.documents_status = 'pending';
+			}
+			const hasIdentificacion = user.documents.some(
+				(doc) => doc.fieldname === 'identificacion'
+			);
+			const hasComprobanteDeDomicilio = user.documents.some(
+				(doc) => doc.fieldname === 'comprobanteDeDomicilio'
+			);
+			const hasComprobanteDeEstadoDeCuenta = user.documents.some(
+				(doc) => doc.fieldname === 'comprobanteDeEstadoDeCuenta'
+			);
+
+			if (
+				!hasIdentificacion ||
+				!hasComprobanteDeDomicilio ||
+				!hasComprobanteDeEstadoDeCuenta
+			) {
+				user.premium_documents_status = 'pending'; // Deja el estado como 'pending'
+			}
+
+			// Save the updated user in the database
+			await user.save();
+
+			const data = {
+				deletedDocumentID: deletedDocument._id,
+				remainingDocuments: user.documents,
+				user: user, // Agregar el usuario completo a la respuesta
+			};
+
+			req.app.io.emit('newStatus', data);
+			return res.sendSuccess({
+				message: 'Documento eliminado del usuario correctamente',
+				payload: data,
+			});
+		} catch (error) {
+			return res.sendServerError('Error al eliminar el documento');
+		}
+	};
+
+	/*   ************************************************************* */
 }
 
 module.exports = new UsersServices();

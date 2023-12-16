@@ -30,7 +30,7 @@ class CartsController {
 
   deleteProductFromCart = async (req, res) => {
     const { cid, pid } = req.params;
-    return await cartsServices.deleteProductFromCart(cid, pid, res);
+    return await cartsServices.deleteProductFromCart(cid, pid, res, req);
   };
 
   updateCart = async (req, res) => {

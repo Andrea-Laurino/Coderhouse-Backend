@@ -3,6 +3,9 @@
 /* ************************************************************************** */
 
 const { Server: SocketIO } = require('socket.io');
+/*  Importar el objeto req configurado con el middleware para utilizar logger 
+antes de la inicialización de la app */
+const req = require('../../utils/logger/loggerSetup');
 
 class SocketConfig {
   static instancia = undefined;
@@ -35,6 +38,22 @@ class SocketConfig {
         socket.on('deleteProduct', (productId) => {
           this.io.emit('deleteProduct', productId);
         });
+        socket.on('deleteDocument', (documentId) => {
+          this.io.emit('deleteDocument', documentId);
+        });
+        socket.on('newDocument', (document) => {
+          this.io.emit('newDocument', document);
+        });
+        socket.on('newStatus', (document) => {
+          this.io.emit('newStatus', document);
+        });
+        socket.on('deleteCartProduct', (productId) => {
+          this.io.emit('deleteCartProduct', productId);
+        });
+        socket.on('updateTotalCartProducts', (total) => {
+          this.io.emit('updateTotalCartProducts', total);
+        });
+
         socket.on('disconnect', () => {
           /*           console.log('Cliente desconectado'); */
         });

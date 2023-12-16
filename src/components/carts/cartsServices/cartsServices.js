@@ -154,11 +154,11 @@ class CartsServices {
 		}
 	};
 
-	deleteProductFromCart = async (cid, pid, res) => {
+	deleteProductFromCart = async (cid, pid, res, req) => {
 		try {
 			/* Repository */
 			const cart = await cartsServices.findById(cid);
-			/*       console.log('cid', cid); */
+
 			if (!cart) {
 				return res.sendNotFound('Carrito no encontrado');
 			}
@@ -170,13 +170,24 @@ class CartsServices {
 				return res.sendNotFound('Producto no encontrado en el carrito');
 			}
 
-			cart.products.splice(productIndex, 1);
-			/* Repository */
+			cart.products.splice(productIndex, 1); // Elimina el producto del carrito
+
+			// Guarda la versión actualizada del carrito
 			await cartsServices.save(cart);
-			const data = cart;
+
+			// Calcula la cantidad total de productos en el carrito
+			const updatedTotalProducts = cart.products.reduce(
+				(total, product) => total + product.quantity,
+				0
+			);
+
+			// Emitir el evento para actualizar la cantidad total de productos
+			req.app.io.emit('updateTotalCartProducts', updatedTotalProducts);
+			/*       console.log('updatedTotalProducts de deleteProductFromCart total', updatedTotalProducts); */
+
 			return res.sendSuccess({
 				message: 'Producto eliminado del carrito correctamente',
-				payload: data,
+				payload: cart, // Puedes devolver el carrito actualizado si es necesario
 			});
 		} catch (error) {
 			return res.sendServerError('Error al eliminar el producto del carrito');
@@ -412,7 +423,7 @@ class CartsServices {
 				purchaser: username, // Utiliza el nombre de usuario extraído del token o la sesión
 			});
 
-			// console.log('~~~Ticket~~~', ticket);
+			/*       console.log('~~~Ticket~~~', ticket); */
 			await ticketsServices.create(ticket);
 			// Actualizar el carrito con los productos no comprados
 			cart.products = productsToPurchase.filter((productData) =>
@@ -423,39 +434,42 @@ class CartsServices {
 			// Construir el correo electrónico
 
 			const emailContent = `
-				<h1>Resultado de la compra</h1>
-				<p>Ticket Code: ${ticketCode}</p>
-				<p>Username: ${username}</p>
-				<p>Total Products: ${productsToPurchase.length}</p>
-				<p>Products Purchased: ${
+        <h1>Resultado de la compra</h1>
+        <p>Ticket Code: ${ticketCode}</p>
+        <p>Username: ${username}</p>
+        <p>Total Products: ${productsToPurchase.length}</p>
+        <p>Products Purchased: ${
 					productsToPurchase.length - productsNotPurchased.length
 				}</p>
-				<p>Products Not Purchased: ${productsNotPurchased.length}</p>
-				<!-- Agrega cualquier otra información que desees en el correo -->
+        <p>Products Not Purchased: ${productsNotPurchased.length}</p>
+        <!-- Agrega cualquier otra información que desees en el correo -->
 
-				<!-- Ejemplo: Mostrar productos comprados -->
-				<h2>Productos Comprados</h2>
-				<ul>
-				${productsToPurchase
-					.map(
-						(productData) =>
-							`<li>${productData.productId}: ${productData.quantity}</li>`
-					)
-					.join('')}
-				</ul>`;
-			// console.log(emailContent)
+        <!-- Ejemplo: Mostrar productos comprados -->
+        <h2>Productos Comprados</h2>
+        <ul>
+            ${productsToPurchase
+							.map(
+								(productData) =>
+									`<li>${productData.productId}: ${productData.quantity}</li>`
+							)
+							.join('')}
+        </ul>
+        `;
+
 			/* ////////////////////////////////////////////////////////////// */
 			/* attachments implementado en un correo electrónico */
 			/* ////////////////////////////////////////////////////////////// */
+
 			const attachments = [
 				{
 					filename: 'freelo.png',
 					path: path.join(__dirname, '../../../uploads/mail/freelo.png'),
 				},
 			];
+
 			// Enviar el correo electrónico
 			const emailPayload = {
-				from: 'andreajlaurino@gmail.com', // Cambia esto a la dirección de tu correo
+				from: 'andreajlaurino@gmail.com',
 				to: username, // El destinatario es el usuario obtenido del token o la sesión
 				subject: 'THE BEAUTY - Resultado de la compra',
 				html: emailContent,

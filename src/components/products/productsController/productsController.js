@@ -24,7 +24,8 @@ class ProductsController {
   updateProduct = async (req, res) => {
     const { pid } = req.params;
     const updateFields = req.body;
-    return await ProductsServices.updateProduct(pid, updateFields, res, req);
+    const images = req.files;
+    return await ProductsServices.updateProduct(pid, updateFields, images, res, req);
   };
 
   deleteProduct = async (req, res) => {
@@ -36,9 +37,9 @@ class ProductsController {
     return await ProductsServices.getProducts(limit, page, sort, query, res);
   };
 
-  getAdminProducts = async (req, res) => {
+  getAdminDashboardProducts = async (req, res) => {
     const { limit, page, sort, query } = req.query;
-    return await ProductsServices.getAdminProducts(limit, page, sort, query, res);
+    return await ProductsServices.getAdminDashboardProducts(limit, page, sort, query, res);
   };
 
   getRealTimeProducts = async (req, res) => {

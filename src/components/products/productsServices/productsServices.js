@@ -62,7 +62,7 @@ class ProductsServices {
 
       // Obtener información del usuario que crea el producto desde req.session.user o req.user
       const userData = req.session.user || req.user;
-      req.logger.debug('UserData', userData);
+      /*       req.logger.debug('UserData', userData); */
 
       if (!title || !description || !code || !price || !stock || !category) {
         try {
@@ -128,9 +128,39 @@ class ProductsServices {
     }
   };
 
-  updateProduct = async (pid, updateFields, res, req) => {
+  /*   updateProduct = async (pid, updateFields, res, req) => {
     try {
-      const allowedFields = ['title', 'description', 'code', 'price', 'stock', 'category', 'image'];
+      const allowedFields = ['title', 'description', 'code', 'price', 'stock', 'category', 'thumbnails'];
+
+      const invalidFields = Object.keys(updateFields).filter((field) => !allowedFields.includes(field));
+      if (invalidFields.length > 0) {
+        return res.sendUserError(`Los siguientes campos no se pueden modificar: ${invalidFields.join(', ')}`);
+      } else {
+        const product = await productsServices.findById(pid);
+
+        if (!product) {
+          return res.sendNotFound('Producto no encontrado');
+        }
+
+        const userData = req.session.user || req.user;
+
+        if (userData.role === 'premium' && product.owner !== userData._id) {
+          return res.sendUserError('Este producto no fue creado por ti como user Premium. No tienes permisos para actualizar este producto');
+        }
+
+        const updatedProduct = await productsServices.findByIdAndUpdate(pid, updateFields, { new: true });
+
+        req.app.io.emit('updateProduct', updatedProduct);
+        const data = updatedProduct;
+        return res.sendSuccess({ message: 'Producto actualizado correctamente', payload: data });
+      }
+    } catch (error) {
+      return res.sendServerError('Error al actualizar el producto');
+    }
+  }; */
+  updateProduct = async (pid, updateFields, images, res, req) => {
+    try {
+      const allowedFields = ['title', 'description', 'code', 'price', 'stock', 'category', 'thumbnails'];
 
       const invalidFields = Object.keys(updateFields).filter((field) => !allowedFields.includes(field));
       if (invalidFields.length > 0) {
@@ -147,7 +177,12 @@ class ProductsServices {
         const userData = req.session.user || req.user;
 
         if (userData.role === 'premium' && product.owner !== userData._id) {
-          return res.sendUserError('Este producto no fue creado por ti como user Premium. No tienes permisos para actualizar este producto');
+          return res.sendUserError('Este producto no fue creado por ti como usuario Premium. No tienes permisos para actualizar este producto');
+        }
+
+        // Handle updating the `thumbnails` field
+        if (images && images.length > 0) {
+          updateFields.thumbnails = images.map((image) => image.filename);
         }
 
         const updatedProduct = await productsServices.findByIdAndUpdate(pid, updateFields, { new: true });
@@ -253,7 +288,7 @@ class ProductsServices {
     }
   };
 
-  getAdminProducts = async (limit, page, sort, query, res) => {
+  getAdminDashboardProducts = async (limit, page, sort, query, res) => {
     try {
       const options = {
         limit: limit ? parseInt(limit) : 10,
@@ -292,8 +327,8 @@ class ProductsServices {
       const hasNextPage = result.hasNextPage;
       const prevPage = result.hasPrevPage ? result.prevPage : null;
       const nextPage = result.hasNextPage ? result.nextPage : null;
-      const prevLink = result.hasPrevPage ? `/admin/products?limit=${options.limit}&page=${result.prevPage}` : null;
-      const nextLink = result.hasNextPage ? `/admin/products?limit=${options.limit}&page=${result.nextPage}` : null;
+      const prevLink = result.hasPrevPage ? `/admin/dashboard/products?limit=${options.limit}&page=${result.prevPage}` : null;
+      const nextLink = result.hasNextPage ? `/admin/dashboard/products?limit=${options.limit}&page=${result.nextPage}` : null;
 
       return {
         products: formattedProducts,

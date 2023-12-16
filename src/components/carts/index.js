@@ -46,7 +46,7 @@ class Carts extends CustomRouter {
     /* Admin */
     /* ************************************************************************************ */
     this.delete(`${basePath}/:cid`, ['ADMIN'], cartsController.deleteCart);
-    this.delete(`${basePath}/:cid/product/:pid`, ['ADMIN'], cartsController.deleteProductFromCart);
+    this.delete(`${basePath}/:cid/product/:pid`, ['ADMIN', 'USER', 'PREMIUM'], cartsController.deleteProductFromCart);
     this.put(`${basePath}/:cid`, ['ADMIN'], cartsController.updateCart);
     this.delete(`${basePath}/:cid/products`, ['ADMIN'], cartsController.deleteAllProductsFromCart);
   }

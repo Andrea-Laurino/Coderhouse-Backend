@@ -31,9 +31,53 @@ class HandlebarsController {
     const userData = req.session.user || req.user;
     const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
 
+    /*console.log(userWithCurrentDTO); */
+
     // Utiliza userWithCurrentDTO en el contexto
     const context = { user: userWithCurrentDTO, ...data };
-    return res.render('profile', context);
+    return res.render('userProfile', context);
+  };
+
+  /*   getUserDashboard = async (req, res) => {
+    const data = await HandlebarsServices.getUserDashboard(res);
+    const userData = req.session.user || req.user;
+    const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
+
+    const context = { user: userWithCurrentDTO, ...data };
+    return res.render('userDashboard', context);
+  }; */
+  getUserDashboard = async (req, res) => {
+    try {
+      const userData = req.session.user || req.user;
+
+      // Obtén todos los datos del usuario, incluyendo los documentos
+      const user = await usersServices.findUserById(userData._id, { path: 'documents' });
+
+      if (!user) {
+        // Manejo de usuario no encontrado
+        return res.sendNotFound('Usuario no encontrado');
+      }
+
+      /*       console.log('****getUserDashboard****', user); */
+
+      // Obtiene la información adicional de Handlebars si es necesario
+      const data = await HandlebarsServices.getUserDashboard(userData);
+
+      if (user.documents_status) {
+        data.documents_status = user.documents_status;
+      }
+      if (user.premium_documents_status) {
+        data.premium_documents_status = user.premium_documents_status;
+      }
+      /*       console.log('****getUserDashboard****DATA', data); */
+      // Incluye los documentos en el contexto
+      const context = { user, documents: user.documents, ...data };
+
+      return res.render('userDashboard', context);
+    } catch (error) {
+      // Manejo de errores
+      return res.sendServerError('Error al obtener los datos del usuario');
+    }
   };
 
   getAdmin = async (req, res) => {
@@ -41,7 +85,7 @@ class HandlebarsController {
     const userData = req.session.user || req.user;
     const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
     const context = { user: userWithCurrentDTO, ...data };
-    return res.render('dashboard', context);
+    return res.render('adminProfile', context);
   };
 
   getCurrent = async (req, res) => {
@@ -102,14 +146,14 @@ class HandlebarsController {
     return res.render('realTimeProducts', data);
   };
 
-  getAdminProducts = async (req, res) => {
+  getAdminDashboardProducts = async (req, res) => {
     const { limit, page, sort, query } = req.query;
     const userData = req.session.user || req.user;
 
     // Obtén el total de productos llamando a getTotalProducts
     const totalProducts = await getTotalProducts();
 
-    const data = await HandlebarsServices.getAdminProducts(limit, page, sort, query, res, userData);
+    const data = await HandlebarsServices.getAdminDashboardProducts(limit, page, sort, query, res, userData);
 
     // Filtra y estructura los datos del usuario utilizando getUserWithCurrentDTO
     const userWithCurrentDTO = await usersServices.getUserWithCurrentDTO(userData);
@@ -118,7 +162,7 @@ class HandlebarsController {
     const context = { user: userWithCurrentDTO, ...data, totalProducts };
     // Emitir el evento totalProductsUpdate a través de req.app.io
     req.app.io.emit('totalProductsUpdate', totalProducts);
-    return res.render('adminProducts', context);
+    return res.render('adminDashboardProducts', context);
   };
 
   getHomeProducts = async (req, res) => {

@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
       password: password,
     };
 
-    fetch('/api/session/useradmin/recovery', {
+    fetch('/api/users/recovery', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

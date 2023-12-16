@@ -20,7 +20,7 @@ function submitForm(event) {
 
   const email = document.getElementById('email').value;
 
-  fetch(`/api/session/useradmin/resetPassByEmail?email=${email}`, {
+  fetch(`/api/users/resetpassbyemail?email=${email}`, {
     method: 'GET',
   })
     .then((response) => response.json())

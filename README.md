@@ -1,4 +1,4 @@
-# Documentar API
+# Cuarta práctica integradora del PF
 
 ## Start
 
@@ -42,13 +42,22 @@
    http://localhost:<PORT>
    ```
 
-## Acceder a la documentación de la API
+## Modo Desarrollo
 
-```
-http://localhost:<PORT>/api-docs/
+Puedes iniciar la aplicación en el entorno de desarrollo con el siguiente comando:
+
+```bash
+npm run dev
 ```
 
-## Credenciales Admin
+Esto iniciará el servidor y creará usuarios y productos en la base de datos de la app para realizar testings:
+
+- 20 Productos (con Faker)
+- Usuarios con los roles "admin", "user" y "premium"
+
+## Credenciales de Admin:
+
+Estas credenciales de admin están definidas en el archivo .env para tests con el role de admin.
 
 ### Email:
 
@@ -62,26 +71,46 @@ adminCoder@coder.com
 adminCod3r123
 ```
 
-## Postman Collections
+# Credenciales de users con roles asignados para testing:
 
-- En la carpeta `postman_collections`, encontrarás los archivos necesarios para importar las colecciones en Postman y realizar pruebas en el proyecto. Las colecciones proporcionan ejemplos de solicitudes HTTP para interactuar con la API y probar su funcionalidad.
+## Credenciales de Admin (role:"admin") creado en la DB al iniciar la app:
 
-- Importante: Como el proyecto cuenta con un Middleware de autorización hay que realizar los siguientes pasos en Postman:
+### Email:
 
-  1.0 - Ir a Resquest -> Cookies -> Manage Cookies
+```
+admin@correo.com
+```
 
-  2.0 - Seleccionar en Type a domain name: localhost
+### Password:
 
-  3.0 - Add Cookie: Cookie_3=value; Path=/; Expires=Tue, 24 Sep 2024 13:22:17 GMT; (Cookie de ejemplo)
+```
+1234
+```
 
-  3.1 - Loguearse como Admin o como User según corresponda para testear la ruta
+## Credenciales de User (role:"user") creado en la DB al iniciar la app:
 
-  3.2 - Una vez logueado ingresar a Application -> Cookies -> http://localhost:8080 y copiar el value del token jwt.
+### Email:
 
-  3.3 - En el Template de la cookie de Postman reemplazar Cookie_3 por jwt y value por el value del token copiado.
+```
+user@correo.com
+```
 
-  3.4 - Debe quedar un código como el siguiente (el token a continuación es un ejemplo):
+### Password:
 
-  jwt=ey123456789wolrtjlwkjt.eyJfaWQiOiI2NGY3YzBkY2ZmMzY2NmQ4YTdjMDA0MDciLCJlbWFpbCI6InVzZXJAY29ycmVvLmNvbSIsInJvbGUiOiJhZG1pbiIsImZpcnN0X25hbWUiOiJ1c2VyIiwibGFzdF9uYW1lIjoidXNlciIsImFnZSI6MzMsImNhcnQiOiI2NGY3YzBkY2ZmMzY2NmQ4YTdjMDA0MDkiLCJpYXQiOjE2OTQwNTU5OTgsImV4cCI6MTY5NDE0MjM5OH0.hIYn2frVQCVNBMGI5E4sRkTqCTBhSHQ0Th0uSOUtabc; Path=/; Expires=Tue, 24 Sep 2024 13:22:17 GMT;
+```
+1234
+```
 
-  3.5 - Tener en cuenta que los token de las cookies expiran por lo que para realizar varios tests hay que loguearse y volver a copiar el token.
+## Credenciales de User Premium (role:"premium") creado en la DB al iniciar la app:
+
+### Email:
+
+```
+premium@correo.com
+```
+
+### Password:
+
+```
+1234
+```

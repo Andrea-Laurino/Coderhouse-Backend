@@ -6,7 +6,12 @@ const UsersServices = require('../usersServices/usersServices');
 
 class UsersController {
   getUsers = async (req, res) => {
-    return await UsersServices.getUsers(res);
+    return await UsersServices.getUsers(req, res);
+  };
+
+  registerUser = async (req, res) => {
+    const payload = req.body;
+    return await UsersServices.registerUser(req, payload, res);
   };
 
   addUser = async (req, res) => {
@@ -50,6 +55,19 @@ class UsersController {
     const updateFields = req.body;
     return await UsersServices.updateUserPremium(uid, updateFields, res, req);
   };
+
+  /*   ************************************************************* */
+  uploadDocuments = async (req, res) => {
+    const { uid } = req.params;
+    const result = await UsersServices.uploadDocuments(uid, res, req);
+    return result;
+  };
+  /*   ************************************************************* */
+  deleteDocumentById = async (req, res) => {
+    const { uid, did } = req.params;
+    return await UsersServices.deleteDocumentById(uid, did, res, req);
+  };
+  /*   ************************************************************* */
 }
 
 module.exports = new UsersController();

@@ -22,12 +22,38 @@ const userSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Cart',
     },
-    /* //////////////////////////////////////// */
-    /*Jwt */
+    documents: [
+      {
+        name: String,
+        reference: String,
+        mimetype: String,
+        fieldname: {
+          type: String,
+          enum: ['identificacion', 'comprobanteDeDomicilio', 'comprobanteDeEstadoDeCuenta', 'document'],
+          default: 'document',
+        },
+      },
+    ],
+    last_connection: {
+      type: Date,
+      default: Date.now,
+    },
     token: String,
-    /* //////////////////////////////////////// */
+    documents_status: {
+      type: String,
+      enum: ['pending', 'upload'],
+      default: 'pending',
+    },
+    premium_documents_status: {
+      type: String,
+      enum: ['pending', 'upload'],
+      default: 'pending',
+    },
   },
-  { collection: 'users' }
+  {
+    collection: 'users',
+    timestamps: true,
+  }
 );
 
 userSchema.plugin(mongoosePaginate);

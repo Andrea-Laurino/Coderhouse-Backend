@@ -40,6 +40,7 @@ class Auth extends CustomRouter {
     /* ************************************************************************************ */
     /* Jwt & Session Logout */
     this.get(`${basePath}/logout`, ['ADMIN', 'USER'], authController.logout);
+    this.get(`${basePath}/current`, ['ADMIN', 'USER', 'PREMIUM'], authController.current);
   }
 }
 
